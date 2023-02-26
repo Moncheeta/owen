@@ -1,5 +1,4 @@
 use std::io;
-
 use crate::arragement::{Size, Position};
 use crate::backend::Backend;
 

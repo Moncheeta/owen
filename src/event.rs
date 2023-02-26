@@ -7,10 +7,6 @@ pub enum Key {
     // Character
     Char(char),
 
-    // Modifiers
-    Ctrl(Box<Key>),
-    Alt(Box<Key>),
-
     // Navigation Keys
     Up,
     Down,
@@ -28,9 +24,21 @@ pub enum Key {
     Function(u8)
 }
 
-pub enum KeyEvent {
-    Press(Key),
-    Release(Key)
+pub enum Modifier {
+    Ctrl,
+    Alt
+}
+
+pub enum KeyEventType {
+    Press,
+    Release
+}
+
+// TODO: switch modifiers to bitflags
+pub struct KeyEvent {
+    key: Key,
+    modifiers: Vec<Modifier>,
+    r#type: KeyEventType
 }
 
 pub enum MouseButton {
