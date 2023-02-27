@@ -1,78 +1,111 @@
-use std::io;
-use crate::arragement::{Size, Position};
-use crate::backend::Backend;
-
-// Represents a character in the terminal
-pub struct Cell {
-    content: Option<char>
-}
-
-impl Default for Cell {
-    fn default() -> Self {
-        Cell {
-            content: None
-        }
+use std::io::{
+    Write,
+    Error
+};
+use crossterm::{
+    queue,
+    terminal::{
+        size,
+        Clear,
+        ClearType
+    },
+    cursor::{
+        position,
+        Show,
+        Hide,
+        MoveTo
     }
-}
-
-pub struct Frame {
-    buffer: Vec<Cell>,
-    size: Size
-}
-
-impl Frame {
-    fn new(size: Size) -> Self {
-        Frame {
-            buffer: Vec::new(),
-            size
-        }
+};
+use crate::{
+    frame::Frame,
+    arragement::{
+        Size,
+        Position
     }
+};
 
-    // Gets the Cell at a position
-    fn get(&self, position: Position) -> &Cell {
-        let index = self.index_of(position.row, position.column);
-        &self.buffer[index]
-    }
-
-    // Gets a mutable reference to a Cell at a position
-    fn get_mut(&mut self, position: Position) -> &mut Cell {
-        let index = self.index_of(position.row, position.column);
-        &mut self.buffer[index]
-    }
-
-    // Returns the index of a Cell at a position
-    fn index_of(&self, row: u16, column: u16) -> usize {
-        ((row * self.size.width) + column).into()
-    }
-
-    // Resizes the frame to a new size
-    fn resize(&mut self, size: Size) {
-        self.buffer.resize_with(size.area().into(), Default::default);
-    }
-}
-
-pub struct Terminal<B>
+pub struct Terminal<W>
 where
-    B: Backend
+    W: Write,
 {
-    backend: B,
+    // Output stream
+    buffer: W,
     frames: [Frame; 2],
+    // The frame is to be drawn
+    index: u8
 }
 
-impl<B> Terminal<B>
+impl<W> Terminal<W>
 where
-    B: Backend
+    W: Write,
 {
-    fn new(backend: B) -> io::Result<Terminal<B>> {
-        let size = backend.size()?;
+    pub fn new(buffer: W) -> Result<Terminal<W>, Error> {
+        let size = match size() {
+            Ok((columns, rows)) => Size { rows, columns },
+            Err(err) => return Err(err)
+        };
         Ok(Terminal {
-            backend,
+            buffer,
             frames: [
                 Frame::new(size),
                 Frame::new(size)
-            ]
+            ],
+            index: 0
         })
     }
 
+    // Switches the current frame index
+    fn switch(&mut self) {
+        if self.index == 1 {
+            self.index = 0;
+        } else {
+            self.index = 1;
+        }
+    }
 
+    // TODO: Write drawing routine
+    // Draws the current frame onto the terminal
+    fn draw(&mut self) -> Result<(), Error> {
+        todo!()
+    }
+
+    // Clears the terminal
+    fn clear(&mut self) -> Result<(), Error> {
+        queue!(self.buffer, Clear(ClearType::All))
+    }
+
+    // Returns the size of the terminal
+    fn size() -> Result<Size, Error> {
+        match size() {
+            Ok((columns, rows)) => Ok(Size {
+                rows,
+                columns
+            }),
+            Err(err) => Err(err)
+        }
+    }
+
+    // Hides the cursor in the terminal
+    fn cursor_hide(&mut self) -> Result<(), Error> {
+        queue!(self.buffer, Hide)
+    }
+
+    // Shows the cursor in the terminal
+    fn cursor_show(&mut self) -> Result<(), Error> {
+        queue!(self.buffer, Show)
+    }
+
+    // Gets the position of the cursor in the terminal
+    fn cursor_get() -> Result<Position, Error> {
+        let cursor_position = position()?;
+        Ok(Position {
+            row: cursor_position.1,
+            column: cursor_position.0
+        })
+    }
+
+    // Changes the position of the cursor in the terminal
+    fn cursor_set(&mut self, position: Position) -> Result<(), Error> {
+        queue!(self.buffer, MoveTo(position.column, position.row))
+    }
 }

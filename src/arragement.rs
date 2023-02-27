@@ -1,31 +1,25 @@
 #[derive(Copy, Clone)]
 pub struct Size {
-    pub width: u16,
-    pub height: u16
+    // Vertical Size
+    pub rows: u16,
+    // Horizontal Size
+    pub columns: u16
 }
 
 impl Size {
-    pub fn new(width: u16, height: u16) -> Self {
+    pub fn new(rows: u16, columns: u16) -> Self {
         Size {
-            width,
-            height
+            rows,
+            columns
         }
     }
 
     pub fn area(&self) -> u16 {
-        self.width * self.height
+        self.rows * self.columns
     }
 }
 
-impl Default for Size {
-    fn default() -> Self {
-        Size {
-            width: 0,
-            height: 0
-        }
-    }
-}
-
+// The origin is at the top left of the terminal
 #[derive(Copy, Clone)]
 pub struct Position {
     pub row: u16,
@@ -41,15 +35,6 @@ impl Position {
     }
 }
 
-impl Default for Position {
-    fn default() -> Self {
-        Position {
-            row: 0,
-            column: 0
-        }
-    }
-}
-
 enum Direction {
     Up,
     Down,
@@ -57,7 +42,7 @@ enum Direction {
     Right
 }
 
+// TODO: Write contraints
 struct Arragement {
     pub direction: Direction,
-//    constraints: Vec<Constraint>
 }
