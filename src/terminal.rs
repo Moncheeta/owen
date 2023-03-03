@@ -10,7 +10,7 @@ use crossterm::{
     cursor::{position, Hide, MoveTo, Show},
     queue,
     style::Print,
-    terminal::size,
+    terminal::{size, EnterAlternateScreen, LeaveAlternateScreen},
 };
 use std::io::{Error, Write};
 
@@ -64,12 +64,22 @@ where
         Ok(())
     }
 
-    // Returns the size of the terminal
-    fn size() -> Result<Size, Error> {
+    // Gets the size of the terminal
+    pub fn size() -> Result<Size, Error> {
         match size() {
             Ok((columns, rows)) => Ok(Size { rows, columns }),
             Err(err) => Err(err),
         }
+    }
+
+    // Makes the terminal switch to an alternate screen
+    pub fn enter_alternate_screen(&mut self) -> Result<(), Error> {
+        queue!(self.buffer, EnterAlternateScreen)
+    }
+
+    // Makes the terminal leave the alternate screen
+    pub fn leave_alternate_screen(&mut self) -> Result<(), Error> {
+        queue!(self.buffer, LeaveAlternateScreen)
     }
 
     // Hides the cursor in the terminal

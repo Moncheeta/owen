@@ -29,14 +29,4 @@ impl Position {
     }
 }
 
-enum Direction {
-    Up,
-    Down,
-    Left,
-    Right,
-}
-
-// TODO: Write contraints
-struct Arragement {
-    pub direction: Direction,
-}
+// TODO: Write arragments
