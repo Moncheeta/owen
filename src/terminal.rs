@@ -20,6 +20,7 @@ where
 {
     // Output stream
     buffer: W,
+    // The difference between the two is updated in the terminal
     frames: [Frame; 2],
     // The frame is to be drawn
     index: usize,
@@ -49,7 +50,8 @@ where
     }
 
     // Draws the current frame onto the terminal
-    pub fn draw(&mut self) -> Result<(), Error> {
+    pub fn draw(&mut self, renderer: impl FnOnce(&mut Frame)) -> Result<(), Error> {
+        renderer(&mut self.frames[self.index]);
         let mut cursor_position = Terminal::<W>::cursor_get()?;
         for (cell, position) in self.frames[self.index].diff(&self.frames[1 - self.index]) {
             if position.row != cursor_position.row || position.column != cursor_position.column - 1
