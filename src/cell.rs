@@ -1,14 +1,11 @@
 // Represents a character in the terminal
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct Cell {
-    content: Option<char>
+    pub symbol: char,
 }
 
 impl Default for Cell {
     fn default() -> Self {
-        Cell {
-            content: None
-        }
+        Cell { symbol: ' ' }
     }
 }
-

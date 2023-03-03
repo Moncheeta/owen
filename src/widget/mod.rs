@@ -1,9 +1,6 @@
 use crate::{
+    arragement::{Position, Size},
     cell::Cell,
-    arragement::{
-        Position,
-        Size
-    }
 };
 
 // A renderable element of the terminal user interface

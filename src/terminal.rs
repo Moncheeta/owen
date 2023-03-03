@@ -1,28 +1,18 @@
-use std::io::{
-    Write,
-    Error
+use crate::{
+    arragement::{
+        Position,
+        // Position
+        Size,
+    },
+    frame::Frame,
 };
 use crossterm::{
+    cursor::{position, Hide, MoveTo, Show},
     queue,
-    terminal::{
-        size,
-        Clear,
-        ClearType
-    },
-    cursor::{
-        position,
-        Show,
-        Hide,
-        MoveTo
-    }
+    style::Print,
+    terminal::size,
 };
-use crate::{
-    frame::Frame,
-    arragement::{
-        Size,
-        Position
-    }
-};
+use std::io::{Error, Write};
 
 pub struct Terminal<W>
 where
@@ -32,7 +22,7 @@ where
     buffer: W,
     frames: [Frame; 2],
     // The frame is to be drawn
-    index: u8
+    index: usize,
 }
 
 impl<W> Terminal<W>
@@ -40,72 +30,69 @@ where
     W: Write,
 {
     pub fn new(buffer: W) -> Result<Terminal<W>, Error> {
-        let size = match size() {
-            Ok((columns, rows)) => Size { rows, columns },
-            Err(err) => return Err(err)
-        };
+        let size = Terminal::<W>::size()?;
         Ok(Terminal {
             buffer,
-            frames: [
-                Frame::new(size),
-                Frame::new(size)
-            ],
-            index: 0
+            frames: [Frame::new(size), Frame::new(size)],
+            index: 0,
         })
     }
 
     // Switches the current frame index
-    fn switch(&mut self) {
+    fn switch(&mut self) -> usize {
         if self.index == 1 {
             self.index = 0;
         } else {
             self.index = 1;
-        }
+        };
+        self.index
     }
 
-    // TODO: Write drawing routine
     // Draws the current frame onto the terminal
-    fn draw(&mut self) -> Result<(), Error> {
-        todo!()
-    }
-
-    // Clears the terminal
-    fn clear(&mut self) -> Result<(), Error> {
-        queue!(self.buffer, Clear(ClearType::All))
+    pub fn draw(&mut self) -> Result<(), Error> {
+        let mut cursor_position = Terminal::<W>::cursor_get()?;
+        for (cell, position) in self.frames[self.index].diff(&self.frames[1 - self.index]) {
+            if position.row != cursor_position.row || position.column != cursor_position.column - 1
+            {
+                self.cursor_move(position)?;
+            } else {
+                cursor_position.column += 1;
+            }
+            queue!(self.buffer, Print(cell.symbol))?;
+        }
+        self.switch();
+        Ok(())
     }
 
     // Returns the size of the terminal
     fn size() -> Result<Size, Error> {
         match size() {
-            Ok((columns, rows)) => Ok(Size {
-                rows,
-                columns
-            }),
-            Err(err) => Err(err)
+            Ok((columns, rows)) => Ok(Size { rows, columns }),
+            Err(err) => Err(err),
         }
     }
 
     // Hides the cursor in the terminal
-    fn cursor_hide(&mut self) -> Result<(), Error> {
+    pub fn cursor_hide(&mut self) -> Result<(), Error> {
         queue!(self.buffer, Hide)
     }
 
     // Shows the cursor in the terminal
-    fn cursor_show(&mut self) -> Result<(), Error> {
+    pub fn cursor_show(&mut self) -> Result<(), Error> {
         queue!(self.buffer, Show)
     }
 
     // Gets the position of the cursor in the terminal
-    fn cursor_get() -> Result<Position, Error> {
+    pub fn cursor_get() -> Result<Position, Error> {
         let cursor_position = position()?;
         Ok(Position {
             row: cursor_position.1,
-            column: cursor_position.0
+            column: cursor_position.0,
         })
     }
 
     // Changes the position of the cursor in the terminal
-    fn cursor_set(&mut self, position: Position) -> Result<(), Error> {
+    pub fn cursor_move(&mut self, position: Position) -> Result<(), Error> {
         queue!(self.buffer, MoveTo(position.column, position.row))
     }
 }
