@@ -7,12 +7,17 @@ pub struct Size {
 }
 
 impl Size {
-    pub fn new(rows: u16, columns: u16) -> Self {
-        Size { rows, columns }
-    }
-
     pub fn area(&self) -> u16 {
         self.rows * self.columns
+    }
+}
+
+impl From<(u16, u16)> for Size {
+    fn from(value: (u16, u16)) -> Self {
+        Size {
+            rows: value.0,
+            columns: value.1,
+        }
     }
 }
 
@@ -23,10 +28,13 @@ pub struct Position {
     pub column: u16,
 }
 
-impl Position {
-    pub fn new(row: u16, column: u16) -> Self {
-        Position { row, column }
+impl From<(u16, u16)> for Position {
+    fn from(value: (u16, u16)) -> Self {
+        Position {
+            row: value.0,
+            column: value.1,
+        }
     }
 }
 
-// TODO: Write arragments
+// TODO: Write arragment and contraints
