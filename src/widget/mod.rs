@@ -5,5 +5,5 @@ use crate::{
 
 // A renderable element of the terminal user interface
 pub trait Widget {
-    fn render(&self, position: Position, size: Size, buffer: &[Cell]);
+    fn render(&self, buffer: &mut [Cell], position: Position, size: Size);
 }

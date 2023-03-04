@@ -3,7 +3,6 @@ use crate::{
     cell::Cell,
     widget::Widget,
 };
-use std::io::Error;
 
 pub struct Frame {
     content: Vec<Cell>,
@@ -56,8 +55,14 @@ impl Frame {
     }
 
     // Draws a widget onto the frame
-    // TODO: Write widget routine
-    pub fn render_widget(widget: impl Widget, position: Position, size: Size) -> Result<(), Error> {
-        todo!()
+    pub fn render_widget(&mut self, widget: impl Widget, position: Position, size: Size) {
+        // TODO: only let the widget have access to a part of the frame
+        // and therefore remove position argument
+
+        // Returns early if there is nothing to render to
+        if size.area() == 0 {
+            return;
+        }
+        widget.render(&mut self.content, position, size);
     }
 }
