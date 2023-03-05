@@ -1,7 +1,13 @@
 [package]
-name = "fruits"
+name = "owen"
 version = "0.1.0"
+description = "A terminal user interface library"
+readme = "README.md"
+repository = "https://github.com/Moncheeta/tui"
+exclude = [".pre-commit-config.yaml", ".rustfmt.toml", ".github"]
+license = "MIT"
 edition = "2021"
+keywords = ["tui", "terminal", "terminal-user-interface", "terminal-ui", "console", "cli"]
 
 [dependencies]
 crossterm = "0.26.0"
