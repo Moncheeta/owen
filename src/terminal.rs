@@ -40,21 +40,24 @@ where
     }
 
     // Switches the current frame index
-    fn switch(&mut self) -> usize {
+    fn switch(&mut self) {
         if self.index == 1 {
             self.index = 0;
         } else {
             self.index = 1;
         };
-        self.index
     }
 
     // Draws the current frame onto the terminal
     pub fn draw(&mut self, renderer: impl FnOnce(&mut Frame)) -> Result<(), Error> {
         renderer(&mut self.frames[self.index]);
         let mut cursor_position = Terminal::<W>::cursor_get()?;
-        for (cell, position) in self.frames[self.index].diff(&self.frames[1 - self.index]) {
-            if position.row != cursor_position.row || position.column != cursor_position.column - 1
+        for (cell, position) in self.frames[self.index]
+            .buffer
+            .diff(&self.frames[1 - self.index].buffer)
+        {
+            if position.row != cursor_position.row
+                || position.column as i32 != cursor_position.column as i32 - 1
             {
                 self.cursor_move(position)?;
             } else {
@@ -62,6 +65,7 @@ where
             }
             queue!(self.buffer, Print(cell.symbol))?;
         }
+        self.buffer.flush()?;
         self.switch();
         Ok(())
     }

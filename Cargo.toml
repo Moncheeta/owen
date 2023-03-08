@@ -11,3 +11,4 @@ keywords = ["tui", "terminal", "terminal-user-interface", "terminal-ui", "consol
 
 [dependencies]
 crossterm = "0.26.0"
+textwrap = "0.16.0"
