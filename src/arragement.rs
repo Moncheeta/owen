@@ -1,4 +1,4 @@
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, PartialEq, Eq)]
 // A structure to organize a position of an object on the terminal.
 // The row and column start at 0. The origin is the top left corner of the terminal;
 pub struct Position {
@@ -17,7 +17,7 @@ impl From<(u16, u16)> for Position {
     }
 }
 
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, PartialEq, Eq)]
 // A structure to organize a size of an object on the terminal.
 // The amount of rows and columns starts at 1.
 pub struct Size {
