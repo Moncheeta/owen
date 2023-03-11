@@ -1,9 +1,5 @@
 use crate::{
-    arragement::{
-        Position,
-        // Position
-        Size,
-    },
+    arragement::{Position, Size},
     frame::Frame,
 };
 use crossterm::{
@@ -48,6 +44,14 @@ where
         };
     }
 
+    // Gets the size of the terminal
+    pub fn size() -> Result<Size, Error> {
+        match size() {
+            Ok((columns, rows)) => Ok(Size { rows, columns }),
+            Err(err) => Err(err),
+        }
+    }
+
     // Draws the current frame onto the terminal
     pub fn draw(&mut self, renderer: impl FnOnce(&mut Frame)) -> Result<(), Error> {
         renderer(&mut self.frames[self.index]);
@@ -68,14 +72,6 @@ where
         self.buffer.flush()?;
         self.switch();
         Ok(())
-    }
-
-    // Gets the size of the terminal
-    pub fn size() -> Result<Size, Error> {
-        match size() {
-            Ok((columns, rows)) => Ok(Size { rows, columns }),
-            Err(err) => Err(err),
-        }
     }
 
     // Makes the terminal switch to an alternate screen

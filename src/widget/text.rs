@@ -1,8 +1,4 @@
-use crate::{
-    arragement::{Position, Size},
-    buffer::Buffer,
-    widget::Widget,
-};
+use crate::{frame::Window, widget::Widget};
 use textwrap::wrap;
 
 pub struct Text<'s> {
@@ -37,33 +33,34 @@ impl<'s> Text<'s> {
 }
 
 impl<'s> Widget for Text<'s> {
-    fn render(&self, buffer: &mut Buffer, position: Position, size: Size) {
-        let mut row = position.row;
-        let mut column = position.column;
+    fn render(&self, window: &mut Window) {
+        let mut row = 0;
+        let mut column = 0;
+        let size = window.size();
         if self.cut {
             for symbol in self.content.chars() {
-                if column >= position.column + size.columns || symbol == '\n' {
+                if column >= size.columns || symbol == '\n' {
                     row += 1;
-                    column = position.column;
-                    if row >= position.row + size.rows || !self.wrap {
+                    column = 0;
+                    if row >= size.rows || !self.wrap {
                         return;
                     } else if symbol == '\n' {
                         continue;
                     }
                 }
-                buffer.get_mut((row, column).into()).symbol = symbol;
+                window.cell_mut((row, column).into()).symbol = symbol;
                 column += 1;
             }
             return;
         }
         for line in wrap(self.content, size.columns as usize) {
             for symbol in line.chars() {
-                buffer.get_mut((row, column).into()).symbol = symbol;
+                window.cell_mut((row, column).into()).symbol = symbol;
                 column += 1;
             }
             row += 1;
-            column = position.column;
-            if row >= position.row + size.rows || !self.wrap {
+            column = 0;
+            if row >= size.rows || !self.wrap {
                 return;
             }
         }
