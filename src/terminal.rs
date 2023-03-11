@@ -4,7 +4,7 @@ use crate::{
 };
 use crossterm::{
     cursor::{position, Hide, MoveTo, Show},
-    queue,
+    execute, queue,
     style::Print,
     terminal::{size, EnterAlternateScreen, LeaveAlternateScreen},
 };
@@ -18,7 +18,7 @@ where
     buffer: W,
     // The difference between the two is updated in the terminal
     frames: [Frame; 2],
-    // The frame is to be drawn
+    // The frame that is drawn
     index: usize,
 }
 
@@ -52,46 +52,52 @@ where
         }
     }
 
+    // Makes the terminal switch to an alternate screen
+    pub fn alternate_screen_enter(&mut self) -> Result<(), Error> {
+        execute!(self.buffer, EnterAlternateScreen)
+    }
+
+    // Makes the terminal leave the alternate screen
+    pub fn alternate_screen_leave(&mut self) -> Result<(), Error> {
+        execute!(self.buffer, LeaveAlternateScreen)
+    }
+
     // Draws the current frame onto the terminal
     pub fn draw(&mut self, renderer: impl FnOnce(&mut Frame)) -> Result<(), Error> {
-        renderer(&mut self.frames[self.index]);
-        let mut cursor_position = Terminal::<W>::cursor_get()?;
-        for (cell, position) in self.frames[self.index]
+        renderer(&mut self.frames[1 - self.index]);
+        let mut cursor_position: Position = match position() {
+            Ok((column, row)) => (row, column).into(),
+            Err(err) => return Err(err),
+        };
+        // The difference between the two frames
+        let diff = self.frames[self.index]
             .buffer
-            .diff(&self.frames[1 - self.index].buffer)
-        {
+            .diff(&self.frames[1 - self.index].buffer);
+        // Update the cells on the screen from the difference
+        for (cell, position) in diff {
             if position.row != cursor_position.row
                 || position.column as i32 != cursor_position.column as i32 - 1
             {
-                self.cursor_move(position)?;
+                queue!(self.buffer, MoveTo(position.column, position.row))?;
             } else {
                 cursor_position.column += 1;
             }
             queue!(self.buffer, Print(cell.symbol))?;
         }
+        // Send all commands to the terminal
         self.buffer.flush()?;
         self.switch();
         Ok(())
     }
 
-    // Makes the terminal switch to an alternate screen
-    pub fn enter_alternate_screen(&mut self) -> Result<(), Error> {
-        queue!(self.buffer, EnterAlternateScreen)
-    }
-
-    // Makes the terminal leave the alternate screen
-    pub fn leave_alternate_screen(&mut self) -> Result<(), Error> {
-        queue!(self.buffer, LeaveAlternateScreen)
-    }
-
     // Hides the cursor in the terminal
     pub fn cursor_hide(&mut self) -> Result<(), Error> {
-        queue!(self.buffer, Hide)
+        execute!(self.buffer, Hide)
     }
 
     // Shows the cursor in the terminal
     pub fn cursor_show(&mut self) -> Result<(), Error> {
-        queue!(self.buffer, Show)
+        execute!(self.buffer, Show)
     }
 
     // Gets the position of the cursor in the terminal
@@ -105,6 +111,6 @@ where
 
     // Changes the position of the cursor in the terminal
     pub fn cursor_move(&mut self, position: Position) -> Result<(), Error> {
-        queue!(self.buffer, MoveTo(position.column, position.row))
+        execute!(self.buffer, MoveTo(position.column, position.row))
     }
 }

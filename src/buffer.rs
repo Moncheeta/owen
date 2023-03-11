@@ -42,13 +42,15 @@ impl Buffer {
     }
 
     // Finds the difference between itself and another frame
-    pub fn diff(&self, other: &Buffer) -> Vec<(Cell, Position)> {
+    pub fn diff<'b>(&self, other: &'b Buffer) -> Vec<(&'b Cell, Position)> {
         let mut diff = Vec::new();
         for row in 0..=self.size.rows - 1 {
             for column in 0..=self.size.columns - 1 {
-                let new_cell = self.content[self.index_of((row, column).into())];
-                if new_cell != other.content[other.index_of((row, column).into())] {
-                    diff.push((new_cell, (row, column).into()));
+                let position = (row, column).into();
+                let new_cell = other.cell(position);
+                let old_cell = self.cell(position);
+                if new_cell != old_cell {
+                    diff.push((new_cell, position));
                 }
             }
         }
