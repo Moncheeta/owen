@@ -38,6 +38,7 @@ impl Buffer {
     pub fn resize(&mut self, size: Size) {
         self.content
             .resize_with(size.area().into(), Default::default);
+        self.size = size;
     }
 
     // Finds the difference between itself and another frame
