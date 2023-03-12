@@ -48,14 +48,18 @@ impl<'s> Widget for Text<'s> {
                         continue;
                     }
                 }
-                window.cell_mut((row, column).into()).symbol = symbol;
+                if let Some(cell) = window.cell_mut((row, column).into()) {
+                    cell.symbol = symbol;
+                };
                 column += 1;
             }
             return;
         }
         for line in wrap(self.content, size.columns as usize) {
             for symbol in line.chars() {
-                window.cell_mut((row, column).into()).symbol = symbol;
+                if let Some(cell) = window.cell_mut((row, column).into()) {
+                    cell.symbol = symbol;
+                };
                 column += 1;
             }
             row += 1;

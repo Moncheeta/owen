@@ -54,12 +54,12 @@ impl<'b> Window<'b> {
     }
 
     // Gets a cell at a position
-    pub fn cell(&self, position: Position) -> &Cell {
+    pub fn cell(&self, position: Position) -> Option<&Cell> {
         self.buffer.cell(self.offset(position))
     }
 
     // Gets a mutable reference to a cell at a position
-    pub fn cell_mut(&mut self, position: Position) -> &mut Cell {
+    pub fn cell_mut(&mut self, position: Position) -> Option<&mut Cell> {
         self.buffer.cell_mut(self.offset(position))
     }
 

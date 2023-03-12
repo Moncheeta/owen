@@ -69,7 +69,7 @@ where
             Ok((column, row)) => (row, column).into(),
             Err(err) => return Err(err),
         };
-        // The difference between the two frames
+        // The difference between the current frame and the previous frame
         let diff = self.frames[self.index]
             .buffer
             .diff(&self.frames[1 - self.index].buffer);
@@ -79,10 +79,13 @@ where
                 || position.column as i32 != cursor_position.column as i32 - 1
             {
                 queue!(self.buffer, MoveTo(position.column, position.row))?;
+                cursor_position.row = position.row;
+                cursor_position.column = position.column;
             } else {
                 cursor_position.column += 1;
             }
             queue!(self.buffer, Print(cell.symbol))?;
+            self.buffer.flush()?;
         }
         // Send all commands to the terminal
         self.buffer.flush()?;

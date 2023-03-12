@@ -23,15 +23,21 @@ impl Buffer {
     }
 
     // Gets the cell at a position
-    pub fn cell(&self, position: Position) -> &Cell {
+    pub fn cell(&self, position: Position) -> Option<&Cell> {
         let index = self.index_of(position);
-        &self.content[index]
+        if index > self.content.len() {
+            return None;
+        }
+        Some(&self.content[index])
     }
 
     // Gets a mutable reference to a cell at a position
-    pub fn cell_mut(&mut self, position: Position) -> &mut Cell {
+    pub fn cell_mut(&mut self, position: Position) -> Option<&mut Cell> {
         let index = self.index_of(position);
-        &mut self.content[index]
+        if index > self.content.len() {
+            return None;
+        }
+        Some(&mut self.content[index])
     }
 
     // Resizes the frame to a new size
@@ -42,15 +48,20 @@ impl Buffer {
     }
 
     // Finds the difference between itself and another frame
+    // Returns all the cells that are different from itself
     pub fn diff<'b>(&self, other: &'b Buffer) -> Vec<(&'b Cell, Position)> {
         let mut diff = Vec::new();
-        for row in 0..=self.size.rows - 1 {
-            for column in 0..=self.size.columns - 1 {
+        for row in 0..self.size.rows {
+            for column in 0..self.size.columns {
                 let position = (row, column).into();
-                let new_cell = other.cell(position);
-                let old_cell = self.cell(position);
-                if new_cell != old_cell {
-                    diff.push((new_cell, position));
+                match (other.cell(position), self.cell(position)) {
+                    (Some(other_cell), Some(buffer_cell)) => {
+                        if other_cell != buffer_cell {
+                            diff.push((other_cell, position));
+                        }
+                    }
+                    (Some(other_cell), None) => diff.push((other_cell, position)),
+                    _ => (),
                 }
             }
         }
