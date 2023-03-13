@@ -1,4 +1,4 @@
-use crate::{frame::Window, widget::Widget};
+use crate::{widget::Widget, window::Window};
 use textwrap::wrap;
 
 pub struct Text<'s> {

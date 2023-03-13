@@ -1,7 +1,16 @@
-use crate::{
-    arragement::{Position, Size},
-    cell::Cell,
-};
+use crate::arragement::{Position, Size};
+
+// Represents a character in the terminal
+#[derive(Clone, Copy, PartialEq, Eq)]
+pub struct Cell {
+    pub symbol: char,
+}
+
+impl Default for Cell {
+    fn default() -> Self {
+        Cell { symbol: ' ' }
+    }
+}
 
 pub struct Buffer {
     content: Vec<Cell>,
@@ -15,6 +24,11 @@ impl Buffer {
             content: vec![Cell::default(); size.area() as usize],
             size,
         }
+    }
+
+    // Gets the size of the buffer
+    pub fn size(&self) -> Size {
+        self.size
     }
 
     // Gets the index of the position in self.content

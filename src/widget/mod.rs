@@ -2,7 +2,7 @@ mod text;
 
 pub use text::Text;
 
-use crate::frame::Window;
+use crate::window::Window;
 
 // A renderable element of the terminal user interface
 pub trait Widget {

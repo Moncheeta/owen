@@ -1,6 +1,6 @@
 use crate::{
     arragement::{Position, Size},
-    frame::Frame,
+    window::Window,
 };
 use crossterm::{
     cursor::{position, Hide, MoveTo, Show},
@@ -17,7 +17,7 @@ where
     // Output stream
     buffer: W,
     // The difference between the two is updated in the terminal
-    frames: [Frame; 2],
+    frames: [Window; 2],
     // The frame that is drawn
     index: usize,
 }
@@ -30,7 +30,7 @@ where
         let size = Terminal::<W>::size()?;
         Ok(Terminal {
             buffer,
-            frames: [Frame::new(size), Frame::new(size)],
+            frames: [Window::new(size), Window::new(size)],
             index: 0,
         })
     }
@@ -63,16 +63,14 @@ where
     }
 
     // Draws the current frame onto the terminal
-    pub fn draw(&mut self, renderer: impl FnOnce(&mut Frame)) -> Result<(), Error> {
+    pub fn draw(&mut self, renderer: impl FnOnce(&mut Window)) -> Result<(), Error> {
         renderer(&mut self.frames[1 - self.index]);
         let mut cursor_position: Position = match position() {
             Ok((column, row)) => (row, column).into(),
             Err(err) => return Err(err),
         };
         // The difference between the current frame and the previous frame
-        let diff = self.frames[self.index]
-            .buffer
-            .diff(&self.frames[1 - self.index].buffer);
+        let diff = self.frames[self.index].diff(&self.frames[1 - self.index]);
         // Update the cells on the screen from the difference
         for (cell, position) in diff {
             if position.row != cursor_position.row
